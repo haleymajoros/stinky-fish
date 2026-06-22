@@ -1,13 +1,4 @@
-import { Redis } from '@upstash/redis';
-
-// Vercel's Redis Marketplace integration (Upstash) injects KV_REST_API_URL /
-// KV_REST_API_TOKEN automatically. We also fall back to the plain Upstash
-// names in case someone wires up a database directly instead of through the
-// Vercel integration.
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+import { redisGet, redisSet, redisSadd, redisSmembers } from './redisClient';
 
 // Data model
 // -----------
@@ -50,23 +41,23 @@ export async function addFish(code, fishList) {
   const setKey = fishSetKey(code);
   await Promise.all(
     fishList.map(async (f) => {
-      await redis.set(fishTextKey(code, f.id), f.text);
-      await redis.sadd(setKey, f.id);
+      await redisSet(fishTextKey(code, f.id), f.text);
+      await redisSadd(setKey, f.id);
     })
   );
 }
 
 export async function getFullBoard(code) {
-  const ids = await redis.smembers(fishSetKey(code));
+  const ids = await redisSmembers(fishSetKey(code));
   const fish = ids.length
     ? await Promise.all(
         ids.map(async (id) => {
-          const text = await redis.get(fishTextKey(code, id));
+          const text = await redisGet(fishTextKey(code, id));
           return text ? { id, text } : null;
         })
       )
     : [];
-  const state = (await redis.get(stateKey(code))) || emptyState();
+  const state = (await redisGet(stateKey(code))) || emptyState();
   return {
     fish: fish.filter(Boolean),
     quick: state.quick || [],
@@ -76,8 +67,8 @@ export async function getFullBoard(code) {
 }
 
 export async function setState(code, partialState) {
-  const current = (await redis.get(stateKey(code))) || emptyState();
+  const current = (await redisGet(stateKey(code))) || emptyState();
   const next = { ...current, ...partialState };
-  await redis.set(stateKey(code), next);
+  await redisSet(stateKey(code), next);
   return next;
 }

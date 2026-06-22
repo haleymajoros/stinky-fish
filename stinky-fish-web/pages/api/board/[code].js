@@ -1,5 +1,6 @@
 import { getFullBoard, addFish } from '../../../lib/kv';
 import { normalizeCode, isValidCode } from '../../../lib/validate';
+import { describeRedisError } from '../../../lib/errors';
 
 export default async function handler(req, res) {
   const code = normalizeCode(req.query.code);
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
       return res.status(200).json(board);
     } catch (err) {
       console.error('GET board failed', err);
-      return res.status(500).json({ error: 'Could not load the board. Check that KV is configured.' });
+      return res.status(500).json({ error: describeRedisError(err) });
     }
   }
 
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
       return res.status(200).json(board);
     } catch (err) {
       console.error('POST board failed', err);
-      return res.status(500).json({ error: 'Could not save your fish. Check that KV is configured.' });
+      return res.status(500).json({ error: describeRedisError(err) });
     }
   }
 

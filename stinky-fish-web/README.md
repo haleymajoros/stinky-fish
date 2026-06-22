@@ -43,14 +43,20 @@ needs a database, which is the next step.
 ### 3. Add a Redis database
 
 - In your new Vercel project, go to the **Storage** tab.
-- Click **Create Database**, then choose **Redis** from the Marketplace
-  providers (Upstash is a common choice; any of the listed Redis providers
-  works the same way).
-- Follow its setup prompts and connect it to this project when asked.
+- Click **Create Database**.
+- You'll see a few Redis options in the Marketplace — **either "Redis" or
+  "Upstash" works** with this app, so pick whichever one you're comfortable
+  with. Both have a genuinely free tier with no card required for normal use
+  at this scale.
+- Follow its setup prompts — when asked to pick a plan/tier, choose the
+  **free** option. Region doesn't matter much for a small team tool like
+  this; pick whatever's closest to you.
+- When it asks which project to connect to, choose this one. This is what
+  injects the database credentials into your project automatically — you
+  won't need to copy any keys yourself.
 
-Vercel automatically adds two environment variables to your project for you —
-`KV_REST_API_URL` and `KV_REST_API_TOKEN` — pointing at your new database.
-You don't need to copy/paste anything yourself.
+Vercel automatically adds the right environment variables for whichever
+provider you chose. You don't need to know or set these yourself.
 
 ### 4. Redeploy
 
@@ -79,7 +85,10 @@ custom domain, if you add one under **Settings → Domains**).
 If you see a "Sync problem" banner in the app, it almost always means the
 Redis database isn't connected yet — double check steps 3 and 4 above, in
 that order (the database has to exist *and* you have to redeploy after
-adding it).
+adding it). If you already have a database connected and just updated the
+code (e.g. re-uploaded this project), you don't need to touch the database
+again — just redeploy so the new code picks up the same environment
+variables.
 
 ## Running it on your own computer (optional)
 

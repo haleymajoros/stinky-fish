@@ -1,5 +1,6 @@
 import { setState, getFullBoard } from '../../../../lib/kv';
 import { normalizeCode, isValidCode } from '../../../../lib/validate';
+import { describeRedisError } from '../../../../lib/errors';
 
 export default async function handler(req, res) {
   const code = normalizeCode(req.query.code);
@@ -31,6 +32,6 @@ export default async function handler(req, res) {
     return res.status(200).json(board);
   } catch (err) {
     console.error('POST state failed', err);
-    return res.status(500).json({ error: 'Could not save board state. Check that KV is configured.' });
+    return res.status(500).json({ error: describeRedisError(err) });
   }
 }
