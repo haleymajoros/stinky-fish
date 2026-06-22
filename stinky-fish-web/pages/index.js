@@ -559,44 +559,51 @@ function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateAc
       <div className="action-section">
         <h3>3. Define course of action</h3>
         <p className="help">Drag your top 3 priority fish below, then agree on next steps.</p>
-        <div className="action-labels">
-          <span />
-          <span>Fish</span>
-          <span>What?</span>
-          <span>Who?</span>
-          <span>When?</span>
-        </div>
         <div className="action-slots">
           {board.actions.map((action, i) => {
             const fish = board.fish.find((f) => f.id === action.fishId);
             return (
               <div className="action-slot" key={i}>
                 <div className="slot-num">{i + 1}</div>
-                <div
-                  className={`slot-fish ${fish ? 'filled' : ''}`}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => handleActionDrop(e, i)}
-                >
-                  {fish ? fish.text : 'Drag a top fish here'}
+                <div className="slot-fields">
+                  <div>
+                    <span className="action-field-label">Stinky fish</span>
+                    <div
+                      className={`slot-fish ${fish ? 'filled' : ''}`}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleActionDrop(e, i)}
+                    >
+                      {fish ? fish.text : 'Drag a top fish here'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="action-field-label">What</span>
+                    <input
+                      type="text"
+                      placeholder="What should we do about it?"
+                      value={action.what || ''}
+                      onChange={(e) => onUpdateActionField(i, 'what', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <span className="action-field-label">Who</span>
+                    <input
+                      type="text"
+                      placeholder="Who will take the lead?"
+                      value={action.who || ''}
+                      onChange={(e) => onUpdateActionField(i, 'who', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <span className="action-field-label">When</span>
+                    <input
+                      type="text"
+                      placeholder="What's our timeframe?"
+                      value={action.when || ''}
+                      onChange={(e) => onUpdateActionField(i, 'when', e.target.value)}
+                    />
+                  </div>
                 </div>
-                <input
-                  type="text"
-                  placeholder="What?"
-                  value={action.what || ''}
-                  onChange={(e) => onUpdateActionField(i, 'what', e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Who?"
-                  value={action.who || ''}
-                  onChange={(e) => onUpdateActionField(i, 'who', e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="When?"
-                  value={action.when || ''}
-                  onChange={(e) => onUpdateActionField(i, 'when', e.target.value)}
-                />
               </div>
             );
           })}
