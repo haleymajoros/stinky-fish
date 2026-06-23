@@ -359,7 +359,7 @@
   .action-slots{ display:flex; flex-direction:column; gap:18px; }
   .action-slot{
     display:flex; gap:14px;
-    background:var(--sand); border-radius:var(--radius); padding:20px 22px;
+    background:var(--sand); border-radius:var(--radius); padding:20px 22px 40px;
     color:var(--ink);
   }
   .action-slot .slot-num{
@@ -382,12 +382,15 @@
   .action-slot .slot-fish.filled{
     border-style:solid; border-color:var(--teal-light); color:var(--ink); background:#fff;
   }
-  .action-slot input{
+  .action-slot input,
+  .action-slot textarea{
     border:1px solid var(--sand-dim); border-radius:8px; padding:11px 12px;
     font-size:14px; font-family:'Karla',sans-serif; outline:none; width:100%;
     background:#fff;
   }
-  .action-slot input:focus{ border-color:var(--teal); }
+  .action-slot textarea{ resize:none; overflow:hidden; line-height:1.5; }
+  .action-slot input:focus,
+  .action-slot textarea:focus{ border-color:var(--teal); }
 
   .footer-note{
     text-align:center; color:rgba(244,232,216,0.3); font-size:11px; margin-top:40px;

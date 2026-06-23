@@ -434,6 +434,19 @@ function SubmittedScreen({ onGoToBoard }) {
   );
 }
 
+function AutoTextarea({ value, onChange, placeholder }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = 'auto';
+      ref.current.style.height = ref.current.scrollHeight + 'px';
+    }
+  }, [value]);
+  return (
+    <textarea ref={ref} placeholder={placeholder} value={value} rows={1} onChange={onChange} />
+  );
+}
+
 function FishCard({ fish, onDragStart, onDragEnd }) {
   return (
     <div
@@ -578,8 +591,7 @@ function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateAc
                   </div>
                   <div>
                     <span className="action-field-label">What</span>
-                    <input
-                      type="text"
+                    <AutoTextarea
                       placeholder="What should we do about it?"
                       value={action.what || ''}
                       onChange={(e) => onUpdateActionField(i, 'what', e.target.value)}
@@ -587,8 +599,7 @@ function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateAc
                   </div>
                   <div>
                     <span className="action-field-label">Who</span>
-                    <input
-                      type="text"
+                    <AutoTextarea
                       placeholder="Who will take the lead?"
                       value={action.who || ''}
                       onChange={(e) => onUpdateActionField(i, 'who', e.target.value)}
@@ -596,8 +607,7 @@ function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateAc
                   </div>
                   <div>
                     <span className="action-field-label">When</span>
-                    <input
-                      type="text"
+                    <AutoTextarea
                       placeholder="What's our timeframe?"
                       value={action.when || ''}
                       onChange={(e) => onUpdateActionField(i, 'when', e.target.value)}
