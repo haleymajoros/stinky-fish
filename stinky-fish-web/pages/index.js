@@ -28,6 +28,8 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const pollRef = useRef(null);
+  const actionDebounceRef = useRef({});
+  const latestActionsRef = useRef(null);
 
   const startPolling = useCallback((code) => {
     stopPolling();
@@ -150,19 +152,22 @@ export default function Home() {
   }
 
   async function updateActionField(idx, field, value) {
-    let computedActions = null;
     setBoard((prev) => {
       if (!prev) return prev;
       const nextActions = prev.actions.map((a, i) => (i === idx ? { ...a, [field]: value } : a));
-      computedActions = nextActions;
+      latestActionsRef.current = nextActions;
       return { ...prev, actions: nextActions };
     });
-    try {
-      const fresh = await updateState(sessionCode, { actions: computedActions || [] });
-      setBoard(fresh);
-    } catch (e) {
-      setError(e.message);
-    }
+    const key = `${idx}-${field}`;
+    clearTimeout(actionDebounceRef.current[key]);
+    actionDebounceRef.current[key] = setTimeout(async () => {
+      if (!latestActionsRef.current) return;
+      try {
+        await updateState(sessionCode, { actions: latestActionsRef.current });
+      } catch (e) {
+        setError(e.message);
+      }
+    }, 500);
   }
 
   function leaveSession() {
