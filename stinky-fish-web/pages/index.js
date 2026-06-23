@@ -36,7 +36,12 @@ export default function Home() {
     pollRef.current = setInterval(async () => {
       try {
         const fresh = await fetchBoard(code);
-        setBoard((prev) => (JSON.stringify(fresh) !== JSON.stringify(prev) ? fresh : prev));
+        setBoard((prev) => {
+          // Preserve locally-edited actions — they may be ahead of Redis if
+          // the debounced save hasn't landed yet. Only fish/quick/big need polling.
+          const merged = prev ? { ...fresh, actions: prev.actions } : fresh;
+          return JSON.stringify(merged) !== JSON.stringify(prev) ? merged : prev;
+        });
         setError(null);
       } catch (e) {
         setError(e.message);
@@ -129,7 +134,7 @@ export default function Home() {
         quick: computedQuick || [],
         big: computedBig || [],
       });
-      setBoard(fresh);
+      setBoard((prev) => (prev ? { ...fresh, actions: prev.actions } : fresh));
     } catch (e) {
       setError(e.message);
     }
@@ -144,8 +149,7 @@ export default function Home() {
       return { ...prev, actions: nextActions };
     });
     try {
-      const fresh = await updateState(sessionCode, { actions: computedActions || [] });
-      setBoard(fresh);
+      await updateState(sessionCode, { actions: computedActions || [] });
     } catch (e) {
       setError(e.message);
     }
