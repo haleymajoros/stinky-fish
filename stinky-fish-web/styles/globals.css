@@ -357,6 +357,7 @@
     text-align:center; color:var(--teal-light); font-size:13px; margin:0 0 18px;
   }
   .action-slots{ display:flex; flex-direction:column; gap:18px; }
+  .pdf-row{ display:flex; justify-content:center; margin-top:28px; }
   .action-slot{
     display:flex; gap:14px;
     background:var(--sand); border-radius:var(--radius); padding:20px 22px 40px;

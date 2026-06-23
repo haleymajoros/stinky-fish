@@ -222,6 +222,7 @@ export default function Home() {
             {screen === 'board' && board && (
               <BoardScreen
                 board={board}
+                sessionCode={sessionCode}
                 onMoveFishToZone={moveFishToZone}
                 onAssignFishToAction={assignFishToAction}
                 onUpdateActionField={updateActionField}
@@ -468,7 +469,92 @@ function FishCard({ fish, onDragStart, onDragEnd }) {
   );
 }
 
-function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateActionField }) {
+async function downloadActionPDF(board, sessionCode) {
+  const { jsPDF } = await import('jspdf');
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const W = doc.internal.pageSize.getWidth();
+  const margin = 48;
+  const col = margin + 90;
+  let y = margin;
+
+  // Header bar
+  doc.setFillColor(10, 37, 64);
+  doc.rect(0, 0, W, 72, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Address the Stinky Fish', margin, 32);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(12);
+  doc.setTextColor(100, 180, 200);
+  doc.text('Course of Action', margin, 52);
+
+  // Meta row
+  y = 96;
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Session: ${sessionCode}`, margin, y);
+  doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, W - margin, y, { align: 'right' });
+
+  // Divider
+  y += 14;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margin, y, W - margin, y);
+  y += 24;
+
+  board.actions.forEach((action, i) => {
+    const fish = board.fish.find((f) => f.id === action.fishId);
+    const rows = [
+      { label: 'STINKY FISH', value: fish ? fish.text : '—' },
+      { label: 'WHAT', value: action.what || '—' },
+      { label: 'WHO', value: action.who || '—' },
+      { label: 'WHEN', value: action.when || '—' },
+    ];
+
+    // Card background
+    const cardX = margin;
+    const cardW = W - margin * 2;
+    // Measure card height first
+    let cardHeight = 16;
+    rows.forEach(({ value }) => {
+      const lines = doc.splitTextToSize(value, cardW - 110);
+      cardHeight += lines.length * 14 + 10;
+    });
+    cardHeight += 8;
+
+    doc.setFillColor(248, 244, 238);
+    doc.roundedRect(cardX, y, cardW, cardHeight, 8, 8, 'F');
+
+    // Priority badge
+    doc.setFillColor(27, 110, 140);
+    doc.circle(cardX + 20, y + 20, 12, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(255, 255, 255);
+    doc.text(String(i + 1), cardX + 20, y + 24.5, { align: 'center' });
+
+    // Fields
+    let fy = y + 14;
+    rows.forEach(({ label, value }) => {
+      const lines = doc.splitTextToSize(value, cardW - 110);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(27, 110, 140);
+      doc.text(label, cardX + 40, fy);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(10, 37, 64);
+      doc.text(lines, cardX + 110, fy);
+      fy += lines.length * 14 + 10;
+    });
+
+    y += cardHeight + 16;
+  });
+
+  doc.save(`stinky-fish-${sessionCode}.pdf`);
+}
+
+function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateActionField, sessionCode }) {
   const sortedIds = new Set([...board.quick, ...board.big]);
   const unsorted = board.fish.filter((f) => !sortedIds.has(f.id));
   const quickFish = board.fish.filter((f) => board.quick.includes(f.id));
@@ -622,6 +708,11 @@ function BoardScreen({ board, onMoveFishToZone, onAssignFishToAction, onUpdateAc
               </div>
             );
           })}
+        </div>
+        <div className="pdf-row">
+          <button className="btn btn-primary" onClick={() => downloadActionPDF(board, sessionCode)}>
+            Download PDF
+          </button>
         </div>
       </div>
     </>
